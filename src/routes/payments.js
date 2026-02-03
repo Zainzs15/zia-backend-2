@@ -5,15 +5,8 @@ import Appointment from "../models/Appointment.js";
 const router = Router();
 const JAZZCASH_NUMBER = "0305-2654324";
 
-function ensureDBConnected() {
-  if (Payment.db.readyState !== 1) {
-    throw new Error("Database not connected");
-  }
-}
-
 router.get("/", async (_req, res) => {
   try {
-    ensureDBConnected();
     const payments = await Payment.find()
       .populate("appointmentId", "name phone preferredDate patientNumber")
       .sort({ createdAt: -1 })
@@ -27,7 +20,6 @@ router.get("/", async (_req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    ensureDBConnected();
     const payment = await Payment.findById(req.params.id)
       .populate("appointmentId", "name phone preferredDate patientNumber")
       .lean();
@@ -43,7 +35,6 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    ensureDBConnected();
     const {
       amount,
       plan,
@@ -103,7 +94,6 @@ router.post("/", async (req, res) => {
 
 router.patch("/:id", async (req, res) => {
   try {
-    ensureDBConnected();
     const { id } = req.params;
     const { status, transactionId } = req.body;
 
@@ -134,7 +124,6 @@ router.patch("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    ensureDBConnected();
     const payment = await Payment.findByIdAndDelete(req.params.id).lean();
     if (!payment) {
       return res.status(404).json({ error: "Payment not found" });

@@ -7,19 +7,12 @@ const CLINIC_START_HOUR = 19;
 const CLINIC_END_HOUR = 22;
 const SLOT_MINUTES = 15;
 
-function ensureDBConnected() {
-  if (Appointment.db.readyState !== 1) {
-    throw new Error("Database not connected");
-  }
-}
-
 function getDateKey(dateString) {
   if (dateString) return String(dateString).slice(0, 10);
   return new Date().toISOString().slice(0, 10);
 }
 
 async function getNextSlotForDate(dateKey) {
-  ensureDBConnected();
   const existingCount = await Appointment.countDocuments({
     preferredDate: dateKey,
   });
@@ -43,7 +36,6 @@ async function getNextSlotForDate(dateKey) {
 
 router.get("/", async (_req, res) => {
   try {
-    ensureDBConnected();
     const appointments = await Appointment.find()
       .sort({ createdAt: -1 })
       .lean();
@@ -56,7 +48,6 @@ router.get("/", async (_req, res) => {
 
 router.get("/date/:date", async (req, res) => {
   try {
-    ensureDBConnected();
     const { date } = req.params;
     const appointments = await Appointment.find({
       preferredDate: date.slice(0, 10),
@@ -72,7 +63,6 @@ router.get("/date/:date", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    ensureDBConnected();
     const appointment = await Appointment.findById(req.params.id).lean();
     if (!appointment) {
       return res.status(404).json({ error: "Appointment not found" });
@@ -86,7 +76,6 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    ensureDBConnected();
     const { name, phone, preferredDate, concern, plan, method, amount, txnId } =
       req.body || {};
 
@@ -136,7 +125,6 @@ router.post("/", async (req, res) => {
 
 router.patch("/:id", async (req, res) => {
   try {
-    ensureDBConnected();
     const updated = await Appointment.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -154,7 +142,6 @@ router.patch("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   try {
-    ensureDBConnected();
     const deleted = await Appointment.findByIdAndDelete(req.params.id).lean();
     if (!deleted) {
       return res.status(404).json({ error: "Appointment not found" });
