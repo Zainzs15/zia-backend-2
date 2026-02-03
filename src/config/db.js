@@ -1,11 +1,8 @@
 import mongoose from "mongoose";
 
-// Prefer env var, but fall back to the hard-coded Atlas URI you provided.
-// IMPORTANT: replace <zain_username> with your REAL PASSWORD before deploying.
-// Also specify a database name so Mongo knows where to store data.
 const MONGO_URI =
   process.env.MONGODB_URI ||
-  "mongodb+srv://zain_username:<zain_username>@cluster0.8ouvezp.mongodb.net/zia-clinic?retryWrites=true&w=majority";
+  "mongodb+srv://zain_username:hWVOKWfi7lPU2C45@cluster0.8ouvezp.mongodb.net/zia-clinic?retryWrites=true&w=majority";
 
 export async function connectDB() {
   try {
