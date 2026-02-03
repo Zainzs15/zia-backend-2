@@ -27,6 +27,14 @@ export default async function handler(req, res) {
     return;
   }
 
-  await ensureReady();
-  app(req, res);
+  try {
+    await ensureReady();
+    app(req, res);
+  } catch (err) {
+    console.error("API handler error:", err);
+    // Even on error, return JSON with the same CORS headers already set.
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Internal server error", details: err.message });
+    }
+  }
 }
