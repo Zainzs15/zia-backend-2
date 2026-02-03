@@ -34,6 +34,7 @@ async function getNextSlotForDate(dateKey) {
   };
 }
 
+// GET all appointments
 router.get("/", async (_req, res) => {
   try {
     const appointments = await Appointment.find()
@@ -41,11 +42,12 @@ router.get("/", async (_req, res) => {
       .lean();
     res.json({ data: appointments });
   } catch (err) {
-    console.error(err);
+    console.error("GET /appointments error:", err);
     res.status(500).json({ error: "Failed to fetch appointments" });
   }
 });
 
+// GET appointments by date
 router.get("/date/:date", async (req, res) => {
   try {
     const { date } = req.params;
@@ -56,11 +58,12 @@ router.get("/date/:date", async (req, res) => {
       .lean();
     res.json({ data: appointments });
   } catch (err) {
-    console.error(err);
+    console.error("GET /appointments/date/:date error:", err);
     res.status(500).json({ error: "Failed to fetch appointments" });
   }
 });
 
+// GET appointment by ID
 router.get("/:id", async (req, res) => {
   try {
     const appointment = await Appointment.findById(req.params.id).lean();
@@ -69,12 +72,15 @@ router.get("/:id", async (req, res) => {
     }
     res.json({ data: appointment });
   } catch (err) {
-    console.error(err);
+    console.error("GET /appointments/:id error:", err);
     res.status(500).json({ error: "Failed to fetch appointment" });
   }
 });
 
+// CREATE appointment
 router.post("/", async (req, res) => {
+  console.log("POST /appointments body:", req.body);
+
   try {
     const { name, phone, preferredDate, concern, plan, method, amount, txnId } =
       req.body || {};
@@ -103,26 +109,32 @@ router.post("/", async (req, res) => {
       status: "pending",
     });
 
+    // Payment creation safely wrapped
     if (plan && amount && method) {
-      await Payment.create({
-        name,
-        phone,
-        plan: plan || "basic",
-        amount: Number(amount) || 600,
-        method: method || "jazzcash",
-        transactionId: txnId || null,
-        appointmentId: appointment._id,
-        status: "pending",
-      });
+      try {
+        await Payment.create({
+          name,
+          phone,
+          plan: plan || "basic",
+          amount: Number(amount) || 600,
+          method: method || "jazzcash",
+          transactionId: txnId || null,
+          appointmentId: appointment._id,
+          status: "pending",
+        });
+      } catch (paymentErr) {
+        console.error("Payment creation failed:", paymentErr);
+      }
     }
 
     res.status(201).json({ data: appointment });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    console.error("POST /appointments error:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
+// UPDATE appointment
 router.patch("/:id", async (req, res) => {
   try {
     const updated = await Appointment.findByIdAndUpdate(
@@ -135,11 +147,12 @@ router.patch("/:id", async (req, res) => {
     }
     res.json({ data: updated });
   } catch (err) {
-    console.error(err);
+    console.error("PATCH /appointments/:id error:", err);
     res.status(500).json({ error: "Failed to update appointment" });
   }
 });
 
+// DELETE appointment
 router.delete("/:id", async (req, res) => {
   try {
     const deleted = await Appointment.findByIdAndDelete(req.params.id).lean();
@@ -148,7 +161,7 @@ router.delete("/:id", async (req, res) => {
     }
     res.json({ message: "Appointment deleted", data: deleted });
   } catch (err) {
-    console.error(err);
+    console.error("DELETE /appointments/:id error:", err);
     res.status(500).json({ error: "Failed to delete appointment" });
   }
 });
