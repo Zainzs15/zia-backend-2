@@ -6,6 +6,9 @@ import appointmentsRouter from "./routes/appointments.js";
 import paymentsRouter from "./routes/payments.js";
 
 const app = express();
+app.get("/favicon.ico", (_req, res) => {
+  res.status(204).end();
+});
 
 // ✅ CORS CONFIG (FIX)
 const corsOptions = {
