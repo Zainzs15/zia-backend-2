@@ -1,34 +1,29 @@
 import express from "express";
-import cors from "cors";
 import morgan from "morgan";
 import appointmentsRouter from "./routes/appointments.js";
 import paymentsRouter from "./routes/payments.js";
 
 const app = express();
 
-// Explicit CORS configuration so production domains can call the API
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "https://www.ziahomeopethic.online",
-  "https://ziahomeopethic.online",
-];
+// Very permissive CORS: allow all origins and methods.
+// This is what you asked for (even if not recommended for security).
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With"
+  );
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Allow non-browser / same-origin requests (no Origin header)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error("Not allowed by CORS"));
-    },
-  })
-);
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
 
-// Handle preflight for all routes
-app.options("*", cors());
+  next();
+});
 
 app.use(express.json());
 app.use(morgan("dev"));
