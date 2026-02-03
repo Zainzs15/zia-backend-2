@@ -13,7 +13,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://ziahomeopethic.online",
   "https://ziahomeopethic.online/confirm-payment",
-  "https://zia-admin.vercel.app/appointments",
+  "https://zia-admin.vercel.app",
 ];
 
 app.use(
