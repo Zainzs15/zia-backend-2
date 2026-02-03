@@ -6,7 +6,30 @@ import paymentsRouter from "./routes/payments.js";
 
 const app = express();
 
-app.use(cors());
+// Explicit CORS configuration so production domains can call the API
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://www.ziahomeopethic.online",
+  "https://ziahomeopethic.online",
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Allow non-browser / same-origin requests (no Origin header)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+  })
+);
+
+// Handle preflight for all routes
+app.options("*", cors());
+
 app.use(express.json());
 app.use(morgan("dev"));
 
