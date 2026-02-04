@@ -5,9 +5,11 @@ import Payment from "../models/Payment.js";
 
 const router = express.Router();
 
+// Clinic hours: 7 PM to 10 PM Pakistan time (UTC+5)
 const CLINIC_START_HOUR = 19;
 const CLINIC_END_HOUR = 22;
 const SLOT_MINUTES = 15;
+const CLINIC_TIMEZONE_OFFSET = "+05:00"; // Pakistan (PKT)
 
 // ---------------- Helper Functions ----------------
 function getDateKey(dateString) {
@@ -20,7 +22,9 @@ async function getNextSlotForDate(dateKey) {
   const totalSlots = ((CLINIC_END_HOUR - CLINIC_START_HOUR) * 60) / SLOT_MINUTES;
   if (existingCount >= totalSlots) return null;
 
-  const startTime = new Date(`${dateKey}T${String(CLINIC_START_HOUR).padStart(2, "0")}:00:00`);
+  // Use explicit timezone so 7–10 PM is in Pakistan time, not server UTC
+  const startTimeStr = `${dateKey}T${String(CLINIC_START_HOUR).padStart(2, "0")}:00:00${CLINIC_TIMEZONE_OFFSET}`;
+  const startTime = new Date(startTimeStr);
   const slotStart = new Date(startTime.getTime() + existingCount * SLOT_MINUTES * 60 * 1000);
   const slotEnd = new Date(slotStart.getTime() + SLOT_MINUTES * 60 * 1000);
 
