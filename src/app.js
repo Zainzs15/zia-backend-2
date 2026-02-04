@@ -7,12 +7,14 @@ import paymentsRouter from "./routes/payments.js";
 
 const app = express();
 
-/* ✅ CORS CONFIG */
+/* ✅ CORS CONFIG – allow frontend origins */
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3000",
   "https://ziahomeopethic.online",
-  "https://ziahomeopethic.online/confirm-payment",
+  "https://www.ziahomeopethic.online",
 ];
 
 app.use(
@@ -22,6 +24,10 @@ app.use(
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // allow Vercel preview and production frontend URLs
+      if (origin && (origin.endsWith(".vercel.app") || origin.startsWith("https://zia-"))) {
         return callback(null, true);
       }
 
